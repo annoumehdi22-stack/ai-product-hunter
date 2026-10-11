@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  agent1:
+    build: .
+    command: uvicorn agent1:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+
+  agent2:
+    build: .
+    command: uvicorn agent2:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+
+  agent3:
+    build: .
+    command: uvicorn agent3:app --host 0.0.0.0 --port 8002
+    ports:
+      - "8002:8002"
+
+  frontend:
+    build: .
+    command: streamlit run frontend.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    depends_on:
+      - agent1
+      - agent2
+      - agent3
