@@ -12,7 +12,7 @@ import markdownify
 
 app = FastAPI(title="AI Smart Product Hunter")
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # 1. إعداد قاعدة البيانات SQLite وفري الجدول إيلا ماكانش
 def init_db():
@@ -35,22 +35,39 @@ class CategoryRequest(BaseModel):
     category_url: str
 
 def scrape_page_text(url: str):
+    # 1. كانصاوبو الـ options خاوية فالأول
     options = uc.ChromeOptions()
-    driver = uc.Chrome(options=options)
+    
+    # 2. كانزيدو الإعدادات ديال Docker
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+
+    # 3. كانعيطو للـ Driver ونعطيوه المسارات اللي كاينين فـ Docker
+    driver = uc.Chrome(
+        options=options,
+        browser_executable_path='/usr/bin/chromium',
+        driver_executable_path='/usr/bin/chromedriver'
+    )
+    
     try:
         driver.get(url)
+        import time
         time.sleep(8)
         
-        # كنجبدو الـ HTML كامل
+        # كانجبدو HTML
         raw_html = driver.find_element(By.TAG_NAME, "body").get_attribute("innerHTML")
         
-        # كنحولو HTML لـ Markdown، وكنحيدو التصاور والسكريبتات اللي كياكلو لينا الـ Tokens على والو
-        clean_md = markdownify.markdownify(raw_html, strip=['img', 'svg', 'script', 'style', 'iframe'])
+        # كانردوه Markdown
+        import markdownify
+        text_content = markdownify.markdownify(raw_html, heading_style="ATX")
         
-        return clean_md
+        return text_content
+        
     except Exception as e:
-        print(f"Error scraping: {e}")
-        return None
+        print(f"❌ Error f l-Scraping: {e}")
+        return ""
+        
     finally:
         driver.quit()
 

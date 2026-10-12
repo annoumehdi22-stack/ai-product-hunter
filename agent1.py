@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import requests
+import os
 
 app = FastAPI(title="Agent 1 - URL Generator")
 
 # حط الـ API Key ديالك هنا
-GROQ_API_KEY = "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" 
+GROQ_API_KEY = os.getenv("GROQ_API_KEY") 
 
 class Agent1Input(BaseModel):
     product_name: str

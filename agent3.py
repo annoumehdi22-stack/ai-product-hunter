@@ -3,11 +3,12 @@ from pydantic import BaseModel
 import requests
 from typing import List, Dict, Any
 import time
+import os
 
 app = FastAPI(title="Agent 3 - Analyzer")
 
 # Ma-nsach t-bedel API Key dyalek hna!
-GROQ_API_KEY = "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" 
+GROQ_API_KEY = os.getenv("GROQ_API_KEY") 
 
 class Agent3Input(BaseModel):
     products: List[Dict[str, Any]]
